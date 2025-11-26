@@ -1,0 +1,2506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zazy Data Hub Admin Dashboard</title>
+    <!-- Paystack Inline Script -->
+    <script src="https://js.paystack.co/v1/inline.js"></script>
+    
+    <style>
+        /* --- CSS STYLES --- */
+        :root {
+            --sidebar-width: 250px;
+            --sidebar-collapsed-width: 70px;
+            --main-bg: #f4f7fa;
+            --sidebar-bg: #1e293b;
+            --sidebar-admin-bg: #331e1e; 
+            --sidebar-hover: #334155;
+            --primary-color: #3b82f6;
+            --primary-dark: #2563eb;
+            --text-color: #f1f5f9;
+            --text-muted: #94a3b8;
+            --card-bg: white;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --transition-speed: 0.3s;
+            
+            /* Network Colors */
+            --mtn-color: #ffcc00;
+            --telecel-color: #e60000;
+            --at-color: #0033cc;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--main-bg);
+            display: flex;
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* --- LANDING PAGE STYLES --- */
+        #landing-page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            min-height: 100vh;
+            background-color: white;
+            z-index: 5000; /* Above dashboard, below login overlay */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .lp-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 5%;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .lp-logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .lp-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .lp-links a {
+            text-decoration: none;
+            color: #475569;
+            font-weight: 500;
+            transition: color 0.2s;
+            cursor: pointer;
+        }
+
+        .lp-links a:hover { color: var(--primary-color); }
+
+        .lp-auth-btns {
+            display: flex;
+            gap: 15px;
+        }
+
+        .lp-btn {
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .lp-btn-outline {
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            background: transparent;
+        }
+
+        .lp-btn-outline:hover { background: #eff6ff; }
+
+        .lp-btn-solid {
+            background: var(--primary-color);
+            color: white;
+            border: 2px solid var(--primary-color);
+        }
+
+        .lp-btn-solid:hover { background: var(--primary-dark); border-color: var(--primary-dark); }
+
+        .lp-hero {
+            padding: 80px 5%;
+            text-align: center;
+            background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+        }
+
+        .lp-hero h1 {
+            font-size: 3.5rem;
+            color: #1e293b;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .lp-hero p {
+            font-size: 1.2rem;
+            color: #64748b;
+            max-width: 700px;
+            margin: 0 auto 40px auto;
+        }
+
+        .lp-features {
+            padding: 60px 5%;
+            background: white;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-top: 40px;
+        }
+
+        .feature-item {
+            text-align: center;
+            padding: 30px;
+            border-radius: 12px;
+            background: #f8fafc;
+            transition: transform 0.3s;
+        }
+
+        .feature-item:hover { transform: translateY(-5px); }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .feature-item h3 { margin-bottom: 10px; color: #1e293b; }
+        .feature-item p { color: #64748b; line-height: 1.6; }
+
+        .lp-pricing-preview {
+            padding: 60px 5%;
+            background: #f1f5f9;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .lp-price-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: var(--shadow-sm);
+            border-top: 5px solid #ccc;
+        }
+
+        .lp-price-card.mtn { border-color: var(--mtn-color); }
+        .lp-price-card.telecel { border-color: var(--telecel-color); }
+        .lp-price-card.at { border-color: var(--at-color); }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .price-row:last-child { border-bottom: none; }
+
+        .lp-footer {
+            background: #1e293b;
+            color: #cbd5e1;
+            padding: 40px 5%;
+            text-align: center;
+            margin-top: auto;
+        }
+
+        /* --- DASHBOARD HIDDEN BY DEFAULT --- */
+        #dashboard-app {
+            display: none; /* Hidden until login */
+            width: 100%;
+            height: 100%;
+            display: flex; 
+        }
+
+        /* --- MODAL STYLES --- */
+        .custom-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 10000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(2px);
+        }
+
+        .custom-modal {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes modalPop {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-header { margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h3 { margin: 0; color: #1e293b; }
+        .close-modal { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #94a3b8; }
+        
+        .notification-banner {
+            background-color: #eff6ff;
+            border-left: 4px solid var(--primary-color);
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #1e3a8a;
+            animation: slideDown 0.5s ease;
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateY(-10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* --- LOGIN PORTAL STYLES --- */
+        #login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(248, 250, 252, 0.95); /* Slight transparency for overlay feel */
+            z-index: 9999;
+            display: none; /* Hidden by default now */
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .auth-card {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            animation: slideUp 0.4s ease-out;
+            display: none; 
+        }
+        
+        .auth-card.active {
+            display: block;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-logo {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .login-title {
+            font-size: 1.5rem;
+            color: #1e293b;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .login-subtitle {
+            color: #64748b;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+        }
+
+        .login-input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .login-input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .login-btn-submit {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 10px;
+        }
+
+        .login-btn-submit:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .auth-links {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+        }
+        
+        .auth-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .auth-link:hover { text-decoration: underline; }
+
+        .login-error {
+            color: #ef4444;
+            background-color: #fef2f2;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            margin-top: 15px;
+            display: none;
+            border: 1px solid #fee2e2;
+        }
+        
+        /* Registration Selection Styles */
+        .reg-type-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .reg-type-btn:hover {
+            border-color: var(--primary-color);
+            background-color: #f8fafc;
+        }
+        
+        .reg-type-btn strong { display: block; font-size: 1.1rem; color: #1e293b; }
+        .reg-type-btn small { color: #64748b; }
+        .reg-type-btn span { float: right; font-weight: bold; color: var(--primary-color); }
+
+        /* 1. Sidebar Styling */
+        #sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--sidebar-bg);
+            color: var(--text-color);
+            flex-shrink: 0;
+            transition: width var(--transition-speed) ease;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        
+        /* Admin Role Sidebar Color */
+        body.is-admin #sidebar {
+            background-color: #1a1c23; 
+        }
+        body.is-admin #sidebar h2 {
+            color: #fca5a5; 
+        }
+        
+        #sidebar h2 {
+            text-align: center;
+            margin: 0;
+            padding: 20px 0;
+            color: white;
+            font-size: 1.25rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            height: 60px;
+            box-sizing: border-box;
+        }
+
+        #sidebar h2 i {
+            color: var(--primary-color);
+        }
+
+        #sidebar .nav-links {
+            padding-top: 20px;
+            flex-grow: 1;
+        }
+
+        #sidebar a {
+            padding: 15px 25px;
+            text-decoration: none;
+            font-size: 15px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        #sidebar a i {
+            width: 24px;
+            text-align: center;
+            margin-right: 15px;
+            font-size: 1.1rem;
+        }
+
+        #sidebar a:hover, #sidebar .active {
+            background-color: rgba(255,255,255,0.05);
+            color: white;
+            border-left: 3px solid var(--primary-color);
+        }
+
+        /* 2. Main Content Area */
+        #main-content {
+            flex-grow: 1;
+            padding: 20px 30px;
+            transition: margin-left var(--transition-speed);
+            overflow-y: auto;
+            max-height: 100vh;
+            width: 100%;
+        }
+
+        /* 3. Header Styling */
+        #header {
+            background-color: var(--card-bg);
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        #toggle-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #475569;
+            padding: 5px;
+            border-radius: 5px;
+            transition: background 0.2s;
+        }
+
+        #toggle-btn:hover {
+            background-color: #e2e8f0;
+        }
+
+        #header h1 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .btn-logout {
+            background: none;
+            border: 1px solid #e2e8f0;
+            padding: 6px 12px;
+            border-radius: 6px;
+            color: #ef4444;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-left: 10px;
+        }
+        
+        .btn-logout:hover {
+            background-color: #fee2e2;
+            border-color: #fecaca;
+        }
+
+        /* 4. Dashboard Views */
+        .view-section {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        .view-section.active-view {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 5. Card/Widget Styling (Key Metrics) */
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .card-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+
+        .card.blue .card-icon { background-color: #e0f2fe; color: #0284c7; }
+        .card.green .card-icon { background-color: #dcfce7; color: #16a34a; }
+        .card.purple .card-icon { background-color: #f3e8ff; color: #9333ea; }
+        .card.orange .card-icon { background-color: #ffedd5; color: #ea580c; }
+
+        .card .value {
+            font-size: 1.75em;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+
+        .card .label {
+            font-size: 0.9em;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        /* 6. Chart Area */
+        .chart-card {
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .chart-header h3 {
+            margin: 0;
+            color: #1e293b;
+        }
+
+        .simple-bar-chart {
+            height: 250px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            padding-top: 20px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .bar-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 10%;
+            height: 100%;
+            justify-content: flex-end;
+            gap: 10px;
+            group: 1;
+        }
+
+        .bar {
+            width: 100%;
+            background-color: var(--primary-color);
+            border-radius: 4px 4px 0 0;
+            transition: height 1s ease-out;
+            opacity: 0.8;
+            height: 0; 
+            position: relative;
+        }
+        
+        .bar:hover {
+            opacity: 1;
+            cursor: pointer;
+        }
+
+        .bar::after {
+            content: attr(data-value);
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .bar:hover::after {
+            opacity: 1;
+        }
+
+        .bar-label {
+            font-size: 12px;
+            color: #64748b;
+            text-align: center;
+        }
+
+        /* 7. Data Plans Table Styling */
+        .plans-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .plan-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+
+        .plan-header {
+            padding: 20px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .plan-header.mtn { background-color: var(--mtn-color); color: #000; }
+        .plan-header.telecel { background-color: var(--telecel-color); }
+        .plan-header.at { background-color: var(--at-color); }
+        .plan-header.afa { background-color: #059669; }
+
+        .plan-header h3 { margin: 0; font-size: 1.2rem; }
+        .plan-header i { font-size: 1.5rem; opacity: 0.8; }
+
+        .plan-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .plan-table th, .plan-table td {
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .plan-table th {
+            background-color: #f8fafc;
+            color: #64748b;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .plan-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .plan-table tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .price-tag {
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        /* 8. Registration Form Styles */
+        .reg-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .fee-card {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .fee-card.dealer-bg {
+             background: linear-gradient(135deg, #0f172a, #1e293b);
+        }
+        
+        .fee-card.afa-bg {
+             background: linear-gradient(135deg, #059669, #047857);
+        }
+        
+        .fee-card.customer-bg {
+             background: linear-gradient(135deg, #4f46e5, #4338ca);
+        }
+
+        .fee-card h2 { margin: 0; font-size: 2rem; color: var(--primary-color); }
+        .fee-card.afa-bg h2 { color: #86efac; }
+        .fee-card.customer-bg h2 { color: #c7d2fe; }
+        .fee-card p { margin: 5px 0 0; opacity: 0.9; }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group.full-width { grid-column: span 2; }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #475569;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box; 
+        }
+        
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .payment-methods {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .pay-option {
+            flex: 1;
+            border: 1px solid #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .pay-option:hover { background-color: #f8fafc; border-color: #94a3b8; }
+        .pay-option.selected { border-color: var(--primary-color); background-color: #eff6ff; color: var(--primary-color); font-weight: bold; }
+
+        .btn-register {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-register:hover { background-color: var(--primary-dark); }
+
+        /* 9. Referral & Pricing Styles */
+        .referral-box {
+            background-color: #e0f2fe;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .link-wrapper {
+            display: flex;
+            gap: 10px;
+        }
+
+        .link-input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            background-color: white;
+            color: #475569;
+            font-family: monospace;
+        }
+
+        .btn-copy {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .network-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        .network-header {
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .network-header.mtn { border-left: 5px solid var(--mtn-color); }
+        .network-header.telecel { border-left: 5px solid var(--telecel-color); }
+        .network-header.at { border-left: 5px solid var(--at-color); }
+
+        .pricing-table-input {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .pricing-table-input th {
+            background-color: #f8fafc;
+            text-align: left;
+            padding: 12px 20px;
+            font-size: 14px;
+            color: #64748b;
+        }
+        
+        .pricing-table-input td {
+            padding: 12px 20px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .price-input-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .price-input-group input {
+            width: 80px;
+            padding: 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .profit-badge {
+            background-color: #dcfce7;
+            color: #16a34a;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* 10. Order Management Styles */
+        .orders-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .order-stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-sm);
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .stat-box h4 { margin: 0; color: #64748b; font-size: 0.9rem; }
+        .stat-box .stat-num { font-size: 1.5rem; font-weight: 700; color: #1e293b; }
+        .stat-box i { font-size: 1.5rem; opacity: 0.2; }
+
+        .order-filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #64748b;
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .order-table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            overflow-x: auto;
+        }
+
+        .order-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .order-table th {
+            text-align: left;
+            padding: 15px 20px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #64748b;
+            font-size: 0.85rem;
+            background-color: #f8fafc;
+        }
+
+        .order-table td {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .user-info .name { font-weight: 600; color: #1e293b; }
+        .user-info .role { font-size: 0.8rem; color: #94a3b8; }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending { background-color: #fef3c7; color: #d97706; }
+        .status-processing { background-color: #e0f2fe; color: #0284c7; }
+        .status-completed { background-color: #dcfce7; color: #16a34a; }
+        .status-rejected { background-color: #fee2e2; color: #dc2626; }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            margin-right: 5px;
+        }
+
+        .btn-process { background-color: #e0f2fe; color: #0284c7; }
+        .btn-process:hover { background-color: #bae6fd; }
+
+        .btn-approve { background-color: #dcfce7; color: #16a34a; }
+        .btn-approve:hover { background-color: #bbf7d0; }
+        
+        .btn-reject { background-color: #fee2e2; color: #dc2626; }
+        .btn-reject:hover { background-color: #fecaca; }
+
+        .btn-edit { background-color: #f3e8ff; color: #9333ea; }
+        .btn-edit:hover { background-color: #e9d5ff; }
+        
+        .btn-buy {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        
+        .btn-buy:hover { background-color: var(--primary-dark); }
+
+        /* Network Icons in Table */
+        .net-icon { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+        .net-mtn { background-color: var(--mtn-color); }
+        .net-telecel { background-color: var(--telecel-color); }
+        .net-at { background-color: var(--at-color); }
+        
+        /* WALLET STYLES */
+        .wallet-card {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: white;
+            padding: 30px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .wallet-balance h3 { margin: 0 0 5px 0; font-weight: 400; opacity: 0.8; font-size: 0.9rem; }
+        .wallet-balance .amount { font-size: 2.5rem; font-weight: 700; color: #3b82f6; }
+        
+        .btn-topup {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-topup:hover { background-color: #2563eb; }
+        
+        .payment-instruction {
+            background-color: #f0f9ff;
+            border: 1px solid #bae6fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            color: #0369a1;
+        }
+        
+        .payment-instruction strong { font-size: 1.1rem; display: block; margin-bottom: 5px; }
+        
+        .payment-method-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .payment-method-toggle button {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #64748b;
+        }
+        
+        .payment-method-toggle button.active {
+            border-color: var(--primary-color);
+            background: #eff6ff;
+            color: var(--primary-color);
+        }
+
+        /* SEARCH BAR (Support View) */
+        .search-wrapper {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .search-input {
+            flex-grow: 1;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+        }
+        .btn-search {
+            padding: 0 25px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        /* COURSE STYLES */
+        .course-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+        .course-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+        .course-card:hover { transform: translateY(-5px); }
+        .course-thumb {
+            height: 160px;
+            background: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            font-size: 3rem;
+        }
+        .course-content { padding: 20px; }
+        .course-title { font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 8px; }
+        .course-desc { font-size: 0.9rem; color: #64748b; margin-bottom: 15px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;}
+        .course-footer { display: flex; justify-content: space-between; align-items: center; }
+        .course-price { font-weight: 700; color: var(--primary-color); font-size: 1.1rem; }
+
+        /* Responsive Sidebar Collapse */
+        .collapsed-sidebar #sidebar {
+            width: var(--sidebar-collapsed-width);
+        }
+
+        .collapsed-sidebar #sidebar h2 span, 
+        .collapsed-sidebar #sidebar a span {
+            display: none;
+        }
+        
+        .collapsed-sidebar #sidebar h2 {
+            justify-content: center;
+        }
+
+        .collapsed-sidebar #sidebar h2 i {
+            font-size: 1.5rem;
+        }
+
+        .collapsed-sidebar #sidebar a {
+            justify-content: center;
+            padding: 15px 0;
+        }
+
+        .collapsed-sidebar #sidebar a i {
+            margin-right: 0;
+            font-size: 1.25rem;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .form-group.full-width { grid-column: span 1; }
+            .wallet-card { flex-direction: column; text-align: center; gap: 20px; }
+            
+            #sidebar {
+                position: fixed;
+                height: 100%;
+                z-index: 100;
+                left: 0;
+                width: var(--sidebar-width);
+                transform: translateX(0);
+            }
+
+            body.mobile-hidden #sidebar {
+                transform: translateX(-100%);
+            }
+            
+            body.mobile-hidden #main-content {
+                margin-left: 0;
+            }
+
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%; 
+                background: rgba(0,0,0,0.5);
+                z-index: 99;
+            }
+
+            body:not(.mobile-hidden) .sidebar-overlay {
+                display: block;
+            }
+            
+            .link-wrapper { flex-direction: column; }
+            .btn-copy { padding: 10px; }
+        }
+    </style>
+    <!-- Using Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="collapsed-sidebar-off">
+
+    <!-- LANDING PAGE SECTION -->
+    <div id="landing-page">
+        <nav class="lp-nav">
+            <div class="lp-logo">
+                <i class="fas fa-layer-group"></i> Zazy Data Hub
+            </div>
+            <div class="lp-links">
+                <a href="#home">Home</a>
+                <a href="#pricing">Pricing</a>
+                <a href="#features">Features</a>
+                <a href="#contact">Contact</a>
+            </div>
+            <div class="lp-auth-btns">
+                <a class="lp-btn lp-btn-outline" onclick="showOverlay('login-card')">Login</a>
+                <a class="lp-btn lp-btn-solid" onclick="showOverlay('register-card')">Register</a>
+            </div>
+        </nav>
+
+        <div id="home" class="lp-hero">
+            <h1>Welcome to<br>Zazy Data Hub</h1>
+            <p>Your #1 Source for Affordable Data Bundles & Online Courses. Fast, Secure, and Reliable.</p>
+            <a class="lp-btn lp-btn-solid" onclick="showOverlay('register-card')" style="padding: 15px 40px; font-size: 1.1rem;">Get Started Now</a>
+        </div>
+
+        <div id="features" class="lp-features">
+            <h2 style="text-align:center; color:#1e293b; margin-bottom:10px;">Why Choose Us?</h2>
+            <p style="text-align:center; color:#64748b; margin-bottom:30px;">We provide the tools you need to stay connected or run your business.</p>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <i class="fas fa-bolt feature-icon"></i>
+                    <h3>Instant Delivery</h3>
+                    <p>Bundles are delivered automatically within seconds of purchase. No delays.</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-graduation-cap feature-icon"></i>
+                    <h3>Online Courses</h3>
+                    <p>Access premium educational content to boost your skills directly from our hub.</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-id-card feature-icon"></i>
+                    <h3>AFA Registration</h3>
+                    <p>Fast-track AFA registration services available directly from your dashboard.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="pricing" class="lp-pricing-preview">
+            <h2 style="text-align:center; color:#1e293b; margin-bottom:40px;">Our Best Rates</h2>
+            <div class="pricing-grid">
+                <div class="lp-price-card mtn">
+                    <h3 style="color:#ca8a04; margin-bottom:20px;">MTN Data</h3>
+                    <div class="price-row"><span>1 GB</span><strong>GH₵ 6.00</strong></div>
+                    <div class="price-row"><span>5 GB</span><strong>GH₵ 28.00</strong></div>
+                    <div class="price-row"><span>10 GB</span><strong>GH₵ 48.00</strong></div>
+                    <div class="price-row"><span>100 GB</span><strong>GH₵ 365.00</strong></div>
+                </div>
+                <div class="lp-price-card telecel">
+                    <h3 style="color:#dc2626; margin-bottom:20px;">Telecel Data</h3>
+                    <div class="price-row"><span>1.5 GB</span><strong>GH₵ 15.00</strong></div>
+                    <div class="price-row"><span>18.8 GB</span><strong>GH₵ 100.00</strong></div>
+                    <div class="price-row"><span>45.4 GB</span><strong>GH₵ 200.00</strong></div>
+                    <div class="price-row"><span>210 GB</span><strong>GH₵ 330.00</strong></div>
+                </div>
+                <div class="lp-price-card at">
+                    <h3 style="color:#2563eb; margin-bottom:20px;">AT Data</h3>
+                    <div class="price-row"><span>1 GB</span><strong>GH₵ 10.00</strong></div>
+                    <div class="price-row"><span>10 GB</span><strong>GH₵ 100.00</strong></div>
+                    <div class="price-row"><span>30 GB</span><strong>GH₵ 200.00</strong></div>
+                    <div class="price-row"><span>105 GB</span><strong>GH₵ 350.00</strong></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="contact" class="lp-footer">
+            <h3>Zazy Data Hub</h3>
+            <p>Contact us: 0599499139 | Accra-Spintex Community 18</p>
+            <p style="margin-top:20px; font-size:0.9rem; opacity:0.7;">&copy; 2025 Zazy Data Hub. All rights reserved.</p>
+        </div>
+    </div>
+
+    <!-- LOGIN / AUTH PORTAL (Overlay) -->
+    <div id="login-overlay">
+        <!-- CARD 1: LOGIN -->
+        <div id="login-card" class="auth-card">
+            <div class="login-logo"><i class="fas fa-layer-group"></i></div>
+            <div class="login-title">Welcome Back</div>
+            <div class="login-subtitle">Sign in to your dashboard</div>
+            
+            <form id="login-form">
+                <div class="login-input-group">
+                    <label>Username or Email</label>
+                    <input type="text" id="username" class="login-input" placeholder="Enter username or email" required>
+                </div>
+                <div class="login-input-group">
+                    <label>Password</label>
+                    <input type="password" id="password" class="login-input" placeholder="Enter password" required>
+                </div>
+                <button type="submit" class="login-btn-submit">Secure Login</button>
+            </form>
+            
+            <div class="auth-links">
+                <a class="auth-link" onclick="showCard('forgot-password-card')">Forgot Password?</a>
+                <a class="auth-link" onclick="showCard('register-card')">Create Account</a>
+            </div>
+            <div class="auth-links" style="justify-content:center; margin-top:30px;">
+                <a class="auth-link" onclick="hideOverlay()">Back to Home</a>
+            </div>
+
+            <div id="login-error" class="login-error"><i class="fas fa-exclamation-circle"></i> Invalid Username or Password</div>
+        </div>
+
+        <!-- CARD 2: REGISTER SELECTION -->
+        <div id="register-card" class="auth-card">
+            <div class="login-logo"><i class="fas fa-user-plus"></i></div>
+            <div class="login-title">Join Zazy Data Hub</div>
+            <div class="login-subtitle">Select your account type to get started</div>
+
+            <button class="reg-type-btn" onclick="openRegistration('customer-form')">
+                <strong>Customer Sign Up</strong>
+                <small>Free Account</small>
+                <span>Free</span>
+            </button>
+
+            <button class="reg-type-btn" onclick="openRegistration('agent-form')">
+                <strong>Agent Registration</strong>
+                <small>Lifetime Access</small>
+                <span>Free</span>
+            </button>
+            
+            <button class="reg-type-btn" onclick="openRegistration('dealer-form')">
+                <strong>Dealer Registration</strong>
+                <small>Premium Access</small>
+                <span>Free</span>
+            </button>
+            
+            <div class="auth-links" style="justify-content: center; margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
+                <span style="color: #64748b; font-size: 0.9rem;">Already have an account? </span>
+                <a class="auth-link" onclick="showCard('login-card')" style="margin-left: 5px;">Login to Account</a>
+            </div>
+            <div class="auth-links" style="justify-content:center;">
+                <a class="auth-link" onclick="hideOverlay()">Back to Home</a>
+            </div>
+        </div>
+        
+        <!-- CARD 3: FORGOT PASSWORD -->
+        <div id="forgot-password-card" class="auth-card">
+            <div class="login-title">Reset Password</div>
+            <div class="login-subtitle">Enter your email to receive instructions</div>
+            <form id="forgot-form">
+                <div class="login-input-group">
+                    <label>Email Address</label>
+                    <input type="email" class="login-input" placeholder="name@example.com" required>
+                </div>
+                <button type="submit" class="login-btn-submit">Send Reset Link</button>
+            </form>
+            <div class="auth-links" style="justify-content: center;">
+                <a class="auth-link" onclick="showCard('login-card')">Back to Login</a>
+            </div>
+        </div>
+
+        <!-- CARD 4: PUBLIC REGISTRATION FORM -->
+        <div id="public-reg-container" class="auth-card" style="max-width: 600px;">
+            <div class="login-title" id="public-reg-title">Registration</div>
+            <div id="public-reg-content"></div>
+             <div class="auth-links" style="justify-content: center; margin-top: 20px;">
+                <a class="auth-link" onclick="showCard('register-card')">Back to Selection</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Bundle Purchase -->
+    <div id="bundle-purchase-modal" class="custom-modal-overlay">
+        <div class="custom-modal">
+            <div class="modal-header">
+                <h3>Confirm Bundle Purchase</h3>
+                <button class="close-modal" onclick="closeModal('bundle-purchase-modal')">&times;</button>
+            </div>
+            <form id="bundle-purchase-form">
+                <div class="form-group">
+                    <label>Selected Bundle</label>
+                    <input type="text" id="modal-bundle-name" readonly style="background:#f1f5f9;">
+                </div>
+                <div class="form-group">
+                    <label>Cost</label>
+                    <input type="text" id="modal-bundle-price" readonly style="background:#f1f5f9; font-weight:bold;">
+                </div>
+                <div class="form-group">
+                    <label>Beneficiary Phone Number</label>
+                    <input type="tel" id="modal-beneficiary-number" placeholder="024xxxxxxx" required>
+                </div>
+                <div class="form-group">
+                    <label>Confirm Phone Number</label>
+                    <input type="tel" id="modal-confirm-number" placeholder="Re-enter number" required>
+                </div>
+                <button type="submit" class="btn-register">Place Order</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: AFA Purchase -->
+    <div id="afa-purchase-modal" class="custom-modal-overlay">
+        <div class="custom-modal">
+            <div class="modal-header">
+                <h3>AFA Registration Order</h3>
+                <button class="close-modal" onclick="closeModal('afa-purchase-modal')">&times;</button>
+            </div>
+            <div style="margin-bottom: 15px; padding: 10px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 4px; color: #047857;">
+                Cost: <strong>GH₵ 12.00</strong>
+            </div>
+            <form id="afa-purchase-form">
+                <div class="form-group"><label>Full Name</label><input type="text" id="modal-afa-name" required></div>
+                <div class="form-group"><label>Ghana Card Number</label><input type="text" id="modal-afa-id" placeholder="GHA-..." required></div>
+                <div class="form-group"><label>Contact Number</label><input type="tel" id="modal-afa-contact" required></div>
+                <div class="form-group"><label>Location</label>
+                    <select id="modal-afa-location" required style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+                        <option value="">Select Region</option>
+                        <option value="ahafo">Ahafo</option>
+                        <option value="ashanti">Ashanti</option>
+                        <option value="bono">Bono</option>
+                        <option value="bono-east">Bono East</option>
+                        <option value="central">Central</option>
+                        <option value="eastern">Eastern</option>
+                        <option value="greater-accra">Greater Accra</option>
+                        <option value="north-east">North East</option>
+                        <option value="northern">Northern</option>
+                        <option value="oti">Oti</option>
+                        <option value="savannah">Savannah</option>
+                        <option value="upper-east">Upper East</option>
+                        <option value="upper-west">Upper West</option>
+                        <option value="volta">Volta</option>
+                        <option value="western">Western</option>
+                        <option value="western-north">Western North</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-register">Submit Registration</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD APP WRAPPER (Wrapper for sidebar + main content) -->
+    <div id="dashboard-app">
+        <div id="sidebar">
+            <h2><i class="fas fa-layer-group"></i> <span>Zazy Data Hub</span></h2>
+            <div class="nav-links">
+                <a href="#" class="nav-item active" data-target="dashboard"><i class="fas fa-home"></i> <span>Dashboard</span></a>
+                <a href="#" class="nav-item" data-target="data-plans"><i class="fas fa-database"></i> <span>Data Plans</span></a>
+                <a href="#" class="nav-item" data-target="sales-log"><i class="fas fa-shopping-cart"></i> <span>Order History</span></a>
+                <a href="#" class="nav-item" data-target="wallet"><i class="fas fa-wallet"></i> <span>Wallet</span></a>
+                <a href="#" class="nav-item" data-target="courses"><i class="fas fa-graduation-cap"></i> <span>Online Courses</span></a>
+                <a href="#" class="nav-item" data-target="referral-settings"><i class="fas fa-share-alt"></i> <span>Referral Settings</span></a>
+                <!-- AFA REGISTRATION LINK (Admin Only View) -->
+                <a href="#" class="nav-item" data-target="afa-registration"><i class="fas fa-id-card"></i> <span>AFA Registration</span></a>
+                
+                <a href="#" class="nav-item" data-target="support"><i class="fas fa-headset"></i> <span>Support</span></a>
+                
+                <a href="#" class="nav-item" data-target="customers"><i class="fas fa-users"></i> <span>Customers</span></a>
+                <a href="#" class="nav-item" data-target="reports"><i class="fas fa-chart-line"></i> <span>Reports</span></a>
+                <a href="#" class="nav-item" data-target="settings"><i class="fas fa-cog"></i> <span>Settings</span></a>
+            </div>
+        </div>
+
+        <!-- Overlay for mobile sidebar -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+        <div id="main-content">
+            <div id="header">
+                <div id="header-left">
+                    <button id="toggle-btn" title="Toggle Sidebar"><i class="fas fa-bars"></i></button>
+                    <h1 id="page-title">Dashboard Overview</h1>
+                </div>
+                <div class="user-profile">
+                    <div style="text-align: right;">
+                        <div id="user-name-display" style="font-weight: 600; font-size: 0.95rem;">Admin User</div>
+                        <div id="user-role-display" style="font-size: 0.8rem; color: #64748b;">Administrator</div>
+                    </div>
+                    <div class="user-avatar">AD</div>
+                    <button class="btn-logout" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                </div>
+            </div>
+
+            <!-- NOTIFICATION BANNER -->
+            <div id="notification-area" style="display: none;"></div>
+
+            <!-- VIEW: DASHBOARD OVERVIEW -->
+            <div id="dashboard-view" class="view-section active-view">
+                
+                <!-- ADMIN DASHBOARD -->
+                <div id="admin-dashboard-content" style="display:none;">
+                    <div class="card-container">
+                        <div class="card blue"><div class="value">24,500</div><div class="label">Total System Sales</div></div>
+                        <div class="card green"><div class="value">GH₵ 45,230</div><div class="label">Total Revenue</div></div>
+                        <div class="card purple"><div class="value">1,205</div><div class="label">All Users</div></div>
+                        <div class="card orange"><div class="value">15</div><div class="label">Pending Requests</div></div>
+                    </div>
+                    <div class="card" style="margin-bottom: 30px;">
+                        <h3>Broadcast Notification</h3>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="admin-notify-text" placeholder="Type notification message here..." style="flex-grow: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                            <button class="btn-register" style="width: auto;" onclick="sendNotification()">Send</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- USER SPECIFIC STATS -->
+                <div id="user-stats" class="card-container">
+                    <div class="card blue"><div class="card-icon"><i class="fas fa-shopping-bag"></i></div><div class="value">12</div><div class="label">My Purchases</div></div>
+                    <div class="card green"><div class="card-icon"><i class="fas fa-wallet"></i></div><div class="value">GH₵ <span class="live-wallet-bal">0.00</span></div><div class="label">Wallet Balance</div></div>
+                    <div class="card purple"><div class="card-icon"><i class="fas fa-history"></i></div><div class="value">GH₵ 450</div><div class="label">Total Spend</div></div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Activity Overview (Last 7 Days)</h3>
+                        <button style="border:none; background:none; color:#64748b; cursor:pointer;"><i class="fas fa-ellipsis-h"></i></button>
+                    </div>
+                    <div class="simple-bar-chart">
+                        <!-- Bars populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: DATA PLANS -->
+            <div id="data-plans-view" class="view-section">
+                <div class="plans-container">
+                    <!-- AFA REGISTRATION CARD -->
+                    <div class="plan-card">
+                        <div class="plan-header afa" style="background-color: #059669;">
+                            <h3>AFA Registration Service</h3>
+                            <i class="fas fa-id-card"></i>
+                        </div>
+                        <div style="padding: 20px; text-align: center;">
+                            <p style="color: #64748b; margin-bottom: 20px;">Register instantly for AFA services. Required: Name, Ghana Card, Contact, Location.</p>
+                            <h2 style="color: #059669; margin-bottom: 20px;">GH₵ 12.00</h2>
+                            <button class="btn-register" onclick="openAfaModal()">Register AFA</button>
+                        </div>
+                    </div>
+
+                    <!-- MTN PLAN (DYNAMICALLY RENDERED BY JS) -->
+                    <div class="plan-card">
+                        <div class="plan-header mtn">
+                            <h3>MTN Ghana</h3>
+                            <i class="fas fa-signal"></i>
+                        </div>
+                        <table class="plan-table">
+                            <thead><tr><th>Bundle</th><th>Price</th><th>Validity</th><th>Action</th></tr></thead>
+                            <tbody id="mtn-plans-body">
+                                <!-- Populated by JS based on Role -->
+                            </tbody>
+                        </table>
+                        <div id="admin-mtn-edit-controls" style="padding: 10px; text-align: right; display: none;">
+                            <button class="btn-register" style="width: auto;" onclick="saveMtnPrices()">Save Price Changes</button>
+                        </div>
+                    </div>
+
+                    <!-- TELECEL PLAN -->
+                    <div class="plan-card">
+                        <div class="plan-header telecel">
+                            <h3>Telecel (Vodafone)</h3>
+                            <i class="fas fa-satellite-dish"></i>
+                        </div>
+                        <table class="plan-table">
+                            <thead><tr><th>Bundle</th><th>Price</th><th>Validity</th><th>Action</th></tr></thead>
+                            <tbody>
+                                <tr><td>1.5 GB</td><td class="price-tag">15.00</td><td>Non-Expiry</td><td><button class="btn-buy" onclick="initiateBundleBuy('Telecel', '1.5 GB', 15)">Buy</button></td></tr>
+                                <tr><td>2.5 GB</td><td class="price-tag">20.00</td><td>5 Days</td><td><button class="btn-buy" onclick="initiateBundleBuy('Telecel', '2.5 GB', 20)">Buy</button></td></tr>
+                                <tr><td>18.8 GB</td><td class="price-tag">100.00</td><td>Non-Expiry</td><td><button class="btn-buy" onclick="initiateBundleBuy('Telecel', '18.8 GB', 100)">Buy</button></td></tr>
+                                <tr><td>45.4 GB</td><td class="price-tag">200.00</td><td>Non-Expiry</td><td><button class="btn-buy" onclick="initiateBundleBuy('Telecel', '45.4 GB', 200)">Buy</button></td></tr>
+                                <tr><td>169 GB</td><td class="price-tag">300.00</td><td>Non-Expiry</td><td><button class="btn-buy" onclick="initiateBundleBuy('Telecel', '169 GB', 300)">Buy</button></td></tr>
+                                 <tr><td>210 GB (Broadband)</td><td class="price-tag">330.00</td><td>30 Days</td><td><button class="btn-buy" onclick="initiateBundleBuy('Telecel', '210 GB', 330)">Buy</button></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- AT PLAN -->
+                    <div class="plan-card">
+                        <div class="plan-header at">
+                            <h3>AT (AirtelTigo)</h3>
+                            <i class="fas fa-broadcast-tower"></i>
+                        </div>
+                        <table class="plan-table">
+                            <thead><tr><th>Bundle</th><th>Price</th><th>Validity</th><th>Action</th></tr></thead>
+                            <tbody>
+                                <tr><td>1 GB</td><td class="price-tag">10.00</td><td>No Expiry</td><td><button class="btn-buy" onclick="initiateBundleBuy('AT', '1 GB', 10)">Buy</button></td></tr>
+                                <tr><td>2 GB</td><td class="price-tag">20.00</td><td>No Expiry</td><td><button class="btn-buy" onclick="initiateBundleBuy('AT', '2 GB', 20)">Buy</button></td></tr>
+                                <tr><td>4.5 GB</td><td class="price-tag">50.00</td><td>No Expiry</td><td><button class="btn-buy" onclick="initiateBundleBuy('AT', '4.5 GB', 50)">Buy</button></td></tr>
+                                <tr><td>10 GB</td><td class="price-tag">100.00</td><td>No Expiry</td><td><button class="btn-buy" onclick="initiateBundleBuy('AT', '10 GB', 100)">Buy</button></td></tr>
+                                <tr><td>30 GB</td><td class="price-tag">200.00</td><td>No Expiry</td><td><button class="btn-buy" onclick="initiateBundleBuy('AT', '30 GB', 200)">Buy</button></td></tr>
+                                <tr><td>90 GB</td><td class="price-tag">300.00</td><td>No Expiry</td><td><button class="btn-buy" onclick="initiateBundleBuy('AT', '90 GB', 300)">Buy</button></td></tr>
+                                 <tr><td>105 GB</td><td class="price-tag">350.00</td><td>No Expiry</td><td><button class="btn-buy" onclick="initiateBundleBuy('AT', '105 GB', 350)">Buy</button></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- VIEW: WALLET -->
+            <div id="wallet-view" class="view-section">
+                <div id="user-wallet-section">
+                    <div class="wallet-card">
+                        <div class="wallet-balance">
+                            <h3>Current Wallet Balance</h3>
+                            <div class="amount">GH₵ <span class="live-wallet-bal">0.00</span></div>
+                        </div>
+                        <button class="btn-topup" onclick="document.getElementById('topup-form-container').style.display = 'block'"><i class="fas fa-plus-circle"></i> Top Up Wallet</button>
+                    </div>
+
+                    <div id="topup-form-container" style="display: none; margin-bottom: 30px;">
+                        <div class="reg-container">
+                            <h3 style="margin-top:0;">Fund Wallet</h3>
+                            <div class="payment-method-toggle">
+                                <button onclick="showManualTopUp()">Manual Transfer</button>
+                                <button onclick="showPaystackTopUp()">Paystack (Instant)</button>
+                            </div>
+                            
+                            <!-- Manual Form -->
+                            <div id="manual-topup-section">
+                                <div class="payment-instruction">
+                                    <strong><i class="fas fa-info-circle"></i> Payment Instructions</strong>
+                                    Number: <strong>0554383902</strong><br>
+                                    Name: <strong>Foster Senyo Ventures</strong>
+                                </div>
+                                <form id="topup-request-form">
+                                    <div class="form-group">
+                                        <label>Amount Sent (GHS)</label>
+                                        <input type="number" id="topup-amount" placeholder="e.g. 50" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Transaction Reference ID</label>
+                                        <input type="text" id="topup-ref" placeholder="Enter transaction ID from SMS" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Network Used</label>
+                                        <select id="topup-network">
+                                            <option value="MTN">MTN Mobile Money</option>
+                                            <option value="Telecel">Telecel Cash</option>
+                                            <option value="AT">AT Money</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn-register">Submit Proof for Approval</button>
+                                </form>
+                            </div>
+                            
+                            <!-- Paystack Form -->
+                            <div id="paystack-topup-section" style="display:none;">
+                                <div class="form-group">
+                                    <label>Amount to Top Up (GHS)</label>
+                                    <input type="number" id="paystack-topup-amount" placeholder="e.g. 50">
+                                </div>
+                                <button class="btn-register" onclick="initiatePaystackTopup()">Pay Now</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3>Transaction History</h3>
+                    <div class="order-table-container">
+                        <table class="order-table">
+                            <thead>
+                                <tr><th>Date</th><th>Type</th><th>Description</th><th>Amount</th><th>Status</th></tr>
+                            </thead>
+                            <tbody id="user-transactions-body">
+                                <tr><td colspan="5" style="text-align:center; color:#94a3b8;">No transactions yet</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ADMIN WALLET UI -->
+                <div id="admin-wallet-section" style="display: none;">
+                    <div class="orders-header">
+                        <h2 style="margin:0; color:#1e293b;">Wallet Management</h2>
+                    </div>
+                    <div class="form-grid">
+                        <div class="card" style="grid-column: span 2;">
+                            <h3>Pending Top-Up Requests</h3>
+                            <div class="order-table-container">
+                                <table class="order-table">
+                                    <thead><tr><th>User</th><th>Amount</th><th>Reference ID</th><th>Network</th><th>Actions</th></tr></thead>
+                                    <tbody id="admin-topup-requests-body"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="card" style="grid-column: span 2;">
+                            <h3>Manage User Wallet (Credit/Debit)</h3>
+                            <div class="form-grid" style="margin:0;">
+                                <div class="form-group">
+                                    <label>Select User</label>
+                                    <select id="manual-credit-user">
+                                        <option value="agent">Kwame Agent</option>
+                                        <option value="dealer">Sarah Dealer</option>
+                                        <option value="customer">Emmanuel Customer</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Action Type</label>
+                                    <select id="wallet-action-type">
+                                        <option value="credit">Credit (+ Add Money)</option>
+                                        <option value="debit">Debit (- Deduct Money)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Amount (GHS)</label>
+                                    <input type="number" id="manual-credit-amount" placeholder="0.00">
+                                </div>
+                                <div class="form-group" style="display:flex; align-items:flex-end;">
+                                    <button class="btn-register" onclick="adminManualCredit()">Process Transaction</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- VIEW: ONLINE COURSES (NEW) -->
+            <div id="courses-view" class="view-section">
+                <div class="orders-header">
+                    <h2 style="margin:0; color:#1e293b;">Online Courses</h2>
+                </div>
+                
+                <!-- ADMIN COURSE MANAGEMENT -->
+                <div id="admin-course-manage" style="display:none; margin-bottom: 40px;">
+                    <div class="card">
+                        <h3>Upload New Course</h3>
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label>Course Title</label>
+                                <input type="text" id="new-course-title" placeholder="e.g. Advanced Python Programming">
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Description</label>
+                                <textarea id="new-course-desc" rows="3" placeholder="Brief description of the course content"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Price (GHS)</label>
+                                <input type="number" id="new-course-price" placeholder="0.00">
+                            </div>
+                            <div class="form-group" style="display:flex; align-items:flex-end;">
+                                <button class="btn-register" onclick="uploadCourse()">Upload Course</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3 style="margin-top:30px;">Existing Courses</h3>
+                    <div class="order-table-container">
+                        <table class="order-table">
+                            <thead><tr><th>Title</th><th>Price</th><th>Action</th></tr></thead>
+                            <tbody id="admin-courses-list"></tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- USER COURSE CATALOG -->
+                <div id="user-course-catalog" class="course-grid">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+            
+            <!-- VIEW: SUPPORT -->
+            <div id="support-view" class="view-section">
+                <div class="reg-container" style="max-width: 800px;">
+                    <h3 style="margin-top:0;">Report Issue & Complaints</h3>
+                    <p style="color:#64748b; margin-bottom:20px;">Search for your transaction or fill the form below to report an issue.</p>
+                    
+                    <div class="search-wrapper">
+                        <input type="tel" class="search-input" id="support-search-input" placeholder="Enter Beneficiary Phone Number to Search...">
+                        <button class="btn-search" onclick="searchTransaction()">Search</button>
+                    </div>
+                    
+                    <div id="search-result-msg" style="margin-bottom:15px; display:none;"></div>
+
+                    <form id="support-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Beneficiary Phone Number</label>
+                                <input type="tel" id="support-phone" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Date of Order</label>
+                                <input type="date" id="support-date" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Issue Type</label>
+                                <select id="support-type">
+                                    <option value="Order Not Received">Order Not Received</option>
+                                    <option value="Wrong Bundle">Wrong Bundle</option>
+                                    <option value="Payment Issue">Payment Issue</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Upload Screenshot (Data Balance/SMS)</label>
+                                <input type="file" id="support-file" accept="image/*" required style="padding: 10px;">
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Description of Issue</label>
+                                <textarea id="support-desc" rows="4" placeholder="Describe the issue in detail..." required></textarea>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-register">Submit Complaint</button>
+                    </form>
+                </div>
+                
+                <h3 style="margin-top:30px;">Complaint History</h3>
+                <div class="order-table-container">
+                    <table class="order-table">
+                        <thead><tr><th>Date</th><th>Phone</th><th>Issue</th><th>Status</th></tr></thead>
+                        <tbody id="complaint-history-body">
+                            <tr><td colspan="4" style="text-align:center; color:#94a3b8;">No complaints submitted.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- VIEW: REFERRAL SETTINGS -->
+            <div id="referral-settings-view" class="view-section">
+                <div class="referral-box"><div style="font-weight:600; color:#0369a1;">Your Customer Referral Link</div><div style="font-size:13px; color:#64748b;">Share this link with your customers. They will see the prices you set below.</div><div class="link-wrapper"><input type="text" class="link-input" value="https://databundle.com/ref/agent-88329" readonly id="referral-link"><button class="btn-copy" onclick="copyLink()">Copy Link</button></div></div>
+                <h3 style="margin-bottom:20px; color:#334155;">Configure Selling Prices</h3>
+                <div class="network-section"><div class="network-header mtn"><i class="fas fa-signal" style="color: #ca8a04;"></i><h4 style="margin:0;">MTN Ghana Settings</h4></div><table class="pricing-table-input"><thead><tr><th>Bundle</th><th>Base Price</th><th>Your Selling Price (GHS)</th><th>Est. Profit</th></tr></thead><tbody><tr><td>1 GB</td><td>10.00</td><td><div class="price-input-group"><span>GHS</span><input type="number" value="12.00" min="10.00" step="0.50" onchange="calculateProfit(this, 10)"></div></td><td><span class="profit-badge">+2.00</span></td></tr></tbody></table></div>
+                <button class="btn-register" onclick="alert('Prices saved successfully! Your referral link is updated.')">Save All Changes</button>
+                <div style="height: 50px;"></div>
+            </div>
+
+            <!-- VIEW: AGENT/DEALER/CUSTOMER REGISTRATION (Hidden templates) -->
+            <div id="agent-registration-view" class="view-section"><div class="reg-container"><div class="fee-card"><p>Agent Registration Fee</p><h2>Free</h2><p><small>One-time payment for lifetime access</small></p></div><form id="agent-form"><div class="form-grid"><div class="form-group"><label>First Name</label><input type="text" id="fname" required></div><div class="form-group"><label>Last Name</label><input type="text" id="lname" required></div><div class="form-group"><label>Phone</label><input type="tel" id="phone" required></div><div class="form-group"><label>Email</label><input type="email" id="agent-email" required></div><div class="form-group full-width"><label>Password</label><input type="password" id="agent-password" required></div><div class="form-group full-width"><label>Location</label><select id="location"><option value="">Select Region</option><option value="greater-accra">Greater Accra</option><option value="ashanti">Ashanti</option><option value="central">Central</option></select></div></div><div class="form-group full-width" style="margin-top: 30px;"><button type="submit" class="btn-register">Register Agent</button></div></form></div></div>
+            <div id="dealer-registration-view" class="view-section"><div class="reg-container"><div class="fee-card dealer-bg"><p>Dealer Registration Fee</p><h2>Free</h2></div><form id="dealer-form"><div class="form-grid"><div class="form-group"><label>First Name</label><input type="text" id="d-fname" required></div><div class="form-group"><label>Last Name</label><input type="text" id="d-lname" required></div><div class="form-group"><label>Phone</label><input type="tel" id="d-phone" required></div><div class="form-group"><label>Email</label><input type="email" id="dealer-email" required></div><div class="form-group full-width"><label>Password</label><input type="password" id="dealer-password" required></div><div class="form-group full-width"><label>Location</label><select id="d-location"><option value="greater-accra">Greater Accra</option></select></div></div><div class="form-group full-width" style="margin-top: 30px;"><button type="submit" class="btn-register">Register Dealer</button></div></form></div></div>
+            <div id="customer-registration-view" class="view-section"><div class="reg-container"><div class="fee-card customer-bg"><p>Create Customer Account</p><h2>Free</h2></div><form id="customer-form"><div class="form-grid"><div class="form-group"><label>First Name</label><input type="text" id="c-fname" required></div><div class="form-group"><label>Last Name</label><input type="text" id="c-lname" required></div><div class="form-group"><label>Phone</label><input type="tel" id="c-phone" required></div><div class="form-group"><label>Email</label><input type="email" id="c-email" required></div><div class="form-group full-width"><label>Password</label><input type="password" id="c-password" required></div></div><div class="form-group full-width" style="margin-top: 20px;"><button type="submit" class="btn-register" style="background-color: #4f46e5;">Create Free Account</button></div></form></div></div>
+            <div id="afa-registration-view" class="view-section"><div class="reg-container"><h3>AFA Registration (Admin View)</h3><p>Restricted Area.</p></div></div>
+
+            <!-- VIEW: SALES LOG -->
+            <div id="sales-log-view" class="view-section">
+                <div class="orders-header"><h2 style="margin:0; color:#1e293b;">Order Management</h2><button class="btn-register" style="width:auto; padding: 10px 20px; font-size: 0.9rem;"><i class="fas fa-sync-alt"></i> Refresh</button></div>
+                <div id="admin-stats" class="card-container" style="display:none;"><div class="card blue"><div class="value">24,500</div><div class="label">Total System Sales</div></div><div class="card green"><div class="value">GH₵ 45,230</div><div class="label">Total Revenue</div></div></div>
+                <div class="order-filters"><button class="filter-btn active" onclick="filterOrders('all')">All Orders</button><button class="filter-btn" onclick="filterOrders('pending')">Pending</button><button class="filter-btn" onclick="filterOrders('completed')">Completed</button></div>
+                <div id="admin-orders-view" class="order-table-container" style="display:none;"><table class="order-table"><thead><tr><th>Order ID</th><th>User</th><th>Bundle Details</th><th>Phone</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead><tbody id="admin-orders-body"></tbody></table></div>
+                <div id="user-orders-view" class="order-table-container" style="display:none;"><table class="order-table"><thead><tr><th>Order ID</th><th>Bundle Details</th><th>Phone</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead><tbody id="user-orders-body"><tr><td colspan="6" style="text-align:center; color:#94a3b8;">No recent orders found.</td></tr></tbody></table></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* --- JAVASCRIPT CODE --- */
+        document.addEventListener('DOMContentLoaded', () => {
+            const body = document.body;
+            const toggleBtn = document.getElementById('toggle-btn');
+            const overlay = document.getElementById('sidebar-overlay');
+            const navItems = document.querySelectorAll('.nav-item');
+            const pageTitle = document.getElementById('page-title');
+            const landingPage = document.getElementById('landing-page');
+            const dashboardApp = document.getElementById('dashboard-app');
+            
+            // PAYSTACK KEY
+            // WARNING: ONLY USE PUBLIC KEY HERE. NEVER EXPOSE SECRET KEY IN FRONTEND CODE.
+            const PAYSTACK_PUBLIC_KEY = 'pk_live_841099518455c800e6f1f10f67b6c7b82b235c12';
+
+            // --- STATE VARIABLES ---
+            let currentUser = null;
+            let walletBalance = 0.00;
+            
+            // --- DATA PERSISTENCE ---
+            let users = JSON.parse(localStorage.getItem('db_users'));
+            if (!users) {
+                users = {
+                    'admin': { role: 'admin', name: 'Admin User', password: 'password12', email: 'admin' },
+                    'agent': { role: 'agent', name: 'Kwame Agent', password: 'password12', email: 'agent' },
+                    'dealer': { role: 'dealer', name: 'Sarah Dealer', password: 'password12', email: 'dealer' },
+                    'user': { role: 'customer', name: 'Emmanuel Customer', password: 'password12', email: 'user' }
+                };
+                localStorage.setItem('db_users', JSON.stringify(users));
+            }
+
+            // WALLET BALANCES PERSISTENCE
+            let balances = JSON.parse(localStorage.getItem('db_balances'));
+            if (!balances) {
+                balances = {
+                    'agent': 100.00,
+                    'dealer': 100.00,
+                    'user': 0.00,
+                    'admin': 0.00
+                };
+                localStorage.setItem('db_balances', JSON.stringify(balances));
+            }
+
+            let allOrders = JSON.parse(localStorage.getItem('db_orders'));
+            if (!allOrders) {
+                allOrders = [
+                    { id: 'ORD-8821', user: 'Kwame Agent', details: 'MTN 10GB', phone: '0244123456', amount: 42.00, status: 'pending' }
+                ];
+                localStorage.setItem('db_orders', JSON.stringify(allOrders));
+            }
+            
+            // --- DYNAMIC PRICING DATA ---
+            const defaultMtnRates = [
+                { vol: '1 GB', agent: 4.60, dealer: 4.40, customer: 6.00 },
+                { vol: '2 GB', agent: 9.20, dealer: 8.70, customer: 12.00 },
+                { vol: '3 GB', agent: 13.30, dealer: 12.70, customer: 18.00 },
+                { vol: '4 GB', agent: 17.80, dealer: 17.10, customer: 23.00 },
+                { vol: '5 GB', agent: 22.00, dealer: 21.10, customer: 28.00 },
+                { vol: '6 GB', agent: 25.50, dealer: 25.00, customer: 31.00 },
+                { vol: '8 GB', agent: 34.00, dealer: 33.00, customer: 42.00 },
+                { vol: '10 GB', agent: 48.00, dealer: 40.50, customer: 48.00 },
+                { vol: '15 GB', agent: 59.00, dealer: 58.00, customer: 70.00 },
+                { vol: '20 GB', agent: 79.00, dealer: 78.00, customer: 90.00 },
+                { vol: '25 GB', agent: 98.00, dealer: 97.00, customer: 110.00 },
+                { vol: '30 GB', agent: 118.00, dealer: 117.00, customer: 130.00 },
+                { vol: '40 GB', agent: 157.00, dealer: 155.00, customer: 170.00 },
+                { vol: '50 GB', agent: 190.00, dealer: 189.00, customer: 200.00 },
+                { vol: '100 GB', agent: 355.00, dealer: 345.00, customer: 365.00 }
+            ];
+            let mtnRates = JSON.parse(localStorage.getItem('db_mtn_rates'));
+            if (!mtnRates) {
+                mtnRates = defaultMtnRates;
+                localStorage.setItem('db_mtn_rates', JSON.stringify(mtnRates));
+            }
+            
+            // --- COURSE MANAGEMENT LOGIC ---
+            let availableCourses = JSON.parse(localStorage.getItem('db_courses')) || [];
+            
+            window.renderCourses = function() {
+                const adminList = document.getElementById('admin-courses-list');
+                if(adminList) adminList.innerHTML = '';
+                if (adminList && availableCourses.length === 0) {
+                    adminList.innerHTML = '<tr><td colspan="3" style="text-align:center;">No courses uploaded.</td></tr>';
+                } else if (adminList) {
+                    availableCourses.forEach((c, index) => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `<td>${c.title}</td><td>GH₵ ${parseFloat(c.price).toFixed(2)}</td><td><button class="action-btn btn-reject" onclick="deleteCourse(${index})"><i class="fas fa-trash"></i></button></td>`;
+                        adminList.appendChild(tr);
+                    });
+                }
+                
+                const userCatalog = document.getElementById('user-course-catalog');
+                if(userCatalog) userCatalog.innerHTML = '';
+                if (userCatalog && availableCourses.length === 0) {
+                    userCatalog.innerHTML = '<p style="grid-column:span 3; text-align:center;">No online courses available at the moment.</p>';
+                } else if(userCatalog) {
+                    availableCourses.forEach((c) => {
+                        const card = document.createElement('div');
+                        card.className = 'course-card';
+                        card.innerHTML = `
+                            <div class="course-thumb"><i class="fas fa-book-reader"></i></div>
+                            <div class="course-content">
+                                <div class="course-title">${c.title}</div>
+                                <div class="course-desc">${c.desc}</div>
+                                <div class="course-footer">
+                                    <span class="course-price">GH₵ ${parseFloat(c.price).toFixed(2)}</span>
+                                    <button class="btn-buy" onclick="buyCourse('${c.title}', ${c.price})">Buy Course</button>
+                                </div>
+                            </div>
+                        `;
+                        userCatalog.appendChild(card);
+                    });
+                }
+            }
+            
+            window.uploadCourse = function() {
+                const title = document.getElementById('new-course-title').value;
+                const desc = document.getElementById('new-course-desc').value;
+                const price = document.getElementById('new-course-price').value;
+                if(title && price) {
+                    availableCourses.push({ title, desc, price });
+                    localStorage.setItem('db_courses', JSON.stringify(availableCourses));
+                    alert('Course uploaded successfully!');
+                    renderCourses();
+                } else { alert('Please fill in Title and Price'); }
+            }
+            window.deleteCourse = function(index) {
+                if(confirm('Delete this course?')) { availableCourses.splice(index, 1); localStorage.setItem('db_courses', JSON.stringify(availableCourses)); renderCourses(); }
+            }
+            window.buyCourse = function(title, price) {
+                if(currentUser.role === 'admin') { alert("Admins cannot buy courses."); return; }
+                if(walletBalance >= price) {
+                    if(confirm(`Purchase "${title}" for GH₵ ${price}?`)) {
+                        walletBalance -= price; balances[currentUser.email] = walletBalance; localStorage.setItem('db_balances', JSON.stringify(balances));
+                        updateWalletDisplays(); alert(`Successfully purchased ${title}!`);
+                        const newOrder = { id: 'CRS-' + Math.floor(Math.random()*10000), user: currentUser.name, details: `Course: ${title}`, phone: 'N/A', amount: price, status: 'completed' };
+                        allOrders.unshift(newOrder); localStorage.setItem('db_orders', JSON.stringify(allOrders));
+                    }
+                } else { alert('Insufficient wallet balance.'); }
+            }
+
+            // --- NOTIFICATION LOGIC ---
+            let currentNotification = "";
+            window.sendNotification = function() {
+                const msg = document.getElementById('admin-notify-text').value;
+                if(msg) { currentNotification = msg; alert('Notification Broadcasted!'); document.getElementById('admin-notify-text').value = ''; checkNotification(); }
+            }
+            function checkNotification() {
+                const banner = document.getElementById('notification-area');
+                if(banner && currentNotification) { banner.innerHTML = `<i class="fas fa-bell"></i> <span>${currentNotification}</span>`; banner.className = "notification-banner"; banner.style.display = "flex"; } 
+                else if(banner) { banner.style.display = "none"; }
+            }
+
+            // --- MODAL LOGIC ---
+            window.closeModal = function(modalId) { document.getElementById(modalId).style.display = "none"; }
+            let pendingBundleData = null;
+            window.initiateBundleBuy = function(network, bundle, price) {
+                if(currentUser.role === 'admin') { alert("Admins cannot buy bundles."); return; }
+                pendingBundleData = { network, bundle, price };
+                document.getElementById('modal-bundle-name').value = `${network} ${bundle}`;
+                document.getElementById('modal-bundle-price').value = `GH₵ ${price.toFixed(2)}`;
+                document.getElementById('modal-beneficiary-number').value = "";
+                document.getElementById('modal-confirm-number').value = "";
+                document.getElementById('bundle-purchase-modal').style.display = "flex";
+            }
+            window.openAfaModal = function() {
+                if(currentUser.role === 'admin') { alert("Admins cannot place orders."); return; }
+                document.getElementById('afa-purchase-modal').style.display = "flex";
+            }
+            
+            // --- PAYSTACK INTEGRATION ---
+            window.payWithPaystack = function(email, amount, onCallback) {
+                const handler = PaystackPop.setup({
+                    key: PAYSTACK_PUBLIC_KEY,
+                    email: email,
+                    amount: amount * 100, // Amount in kobo
+                    currency: 'GHS',
+                    callback: function(response) {
+                        // On Success
+                        onCallback(response);
+                    },
+                    onClose: function() {
+                        alert('Transaction cancelled.');
+                    }
+                });
+                handler.openIframe();
+            }
+            
+            // Wallet toggle Logic
+            window.showManualTopUp = function() {
+                document.getElementById('manual-topup-section').style.display = 'block';
+                document.getElementById('paystack-topup-section').style.display = 'none';
+            }
+            window.showPaystackTopUp = function() {
+                document.getElementById('manual-topup-section').style.display = 'none';
+                document.getElementById('paystack-topup-section').style.display = 'block';
+            }
+            
+            window.initiatePaystackTopup = function() {
+                const amt = parseFloat(document.getElementById('paystack-topup-amount').value);
+                if(!amt || amt <= 0) { alert("Enter valid amount"); return; }
+                
+                payWithPaystack(currentUser.email, amt, function(response) {
+                    // Credit Wallet
+                    balances = JSON.parse(localStorage.getItem('db_balances'));
+                    balances[currentUser.email] = (balances[currentUser.email] || 0) + amt;
+                    localStorage.setItem('db_balances', JSON.stringify(balances));
+                    updateWalletDisplays();
+                    alert("Wallet credited successfully!");
+                    document.getElementById('topup-form-container').style.display = 'none';
+                    
+                    addTransactionToHistory('Credit', 'Paystack Topup', amt, 'Success');
+                });
+            }
+
+            // Bundle Purchase Logic Update
+            if(document.getElementById('bundle-purchase-form')) {
+                document.getElementById('bundle-purchase-form').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const phone = document.getElementById('modal-beneficiary-number').value;
+                    const confirmPhone = document.getElementById('modal-confirm-number').value;
+                    if (phone !== confirmPhone) { alert("Phone numbers do not match!"); return; }
+
+                    const processOrder = () => {
+                        addOrderToUserHistory(pendingBundleData.network + " " + pendingBundleData.bundle, phone, pendingBundleData.price);
+                        const newOrder = { id: 'ORD-' + Math.floor(Math.random()*10000), user: currentUser.name, details: `${pendingBundleData.network} ${pendingBundleData.bundle}`, phone: phone, amount: pendingBundleData.price, status: 'pending' };
+                        allOrders.unshift(newOrder);
+                        localStorage.setItem('db_orders', JSON.stringify(allOrders));
+                        closeModal('bundle-purchase-modal');
+                        alert("Order placed successfully!");
+                    };
+
+                    if (currentUser.role === 'customer') {
+                        closeModal('bundle-purchase-modal');
+                        payWithPaystack(currentUser.email, pendingBundleData.price, processOrder);
+                    } else {
+                        if (walletBalance >= pendingBundleData.price) {
+                            walletBalance -= pendingBundleData.price;
+                            balances[currentUser.email] = walletBalance;
+                            localStorage.setItem('db_balances', JSON.stringify(balances));
+                            updateWalletDisplays();
+                            processOrder();
+                        } else {
+                            alert("Insufficient Wallet Balance. Please Top Up.");
+                        }
+                    }
+                });
+            }
+
+            if(document.getElementById('afa-purchase-form')) {
+                document.getElementById('afa-purchase-form').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const price = 12.00;
+                    const processAfa = () => {
+                         const phone = document.getElementById('modal-afa-contact').value;
+                         addOrderToUserHistory("AFA Reg Service", phone, price);
+                         const newOrder = { id: 'AFA-' + Math.floor(Math.random()*10000), user: currentUser.name, details: `AFA Reg`, phone: phone, amount: price, status: 'pending' };
+                         allOrders.unshift(newOrder);
+                         localStorage.setItem('db_orders', JSON.stringify(allOrders));
+                         closeModal('afa-purchase-modal');
+                         alert("AFA Registration Submitted!");
+                    }
+
+                    if (currentUser.role === 'customer') {
+                         closeModal('afa-purchase-modal');
+                         payWithPaystack(currentUser.email, price, processAfa);
+                    } else {
+                        if (walletBalance >= price) {
+                            walletBalance -= price;
+                            balances[currentUser.email] = walletBalance;
+                            localStorage.setItem('db_balances', JSON.stringify(balances));
+                            updateWalletDisplays();
+                            processAfa();
+                        } else { alert("Insufficient Wallet Balance"); }
+                    }
+                });
+            }
+
+            function addOrderToUserHistory(details, phone, amount) {
+                const tbody = document.getElementById('user-orders-body');
+                if(tbody.rows[0] && tbody.rows[0].cells.length === 1) tbody.innerHTML = '';
+                const row = `<tr><td>ORD-NEW</td><td>${details}</td><td>${phone}</td><td>GH₵ ${amount.toFixed(2)}</td><td>Just Now</td><td><span class="status-badge status-pending">Pending</span></td></tr>`;
+                tbody.insertAdjacentHTML('afterbegin', row);
+            }
+            
+            function addTransactionToHistory(type, desc, amt, status) {
+                const tbody = document.getElementById('user-transactions-body');
+                const row = document.createElement('tr');
+                const date = new Date().toLocaleDateString();
+                let statusColor = status === 'Success' ? 'green' : 'orange';
+                row.innerHTML = `<td>${date}</td><td>${type}</td><td>${desc}</td><td>GH₵ ${amt.toFixed(2)}</td><td style="color:${statusColor}; font-weight:bold;">${status}</td>`;
+                if(tbody.children[0] && tbody.children[0].cells.length === 1) tbody.innerHTML = '';
+                tbody.prepend(row);
+            }
+
+            // --- PUBLIC VIEW / AUTH LOGIC ---
+            window.showOverlay = function(cardId) {
+                document.getElementById('login-overlay').style.display = 'flex';
+                document.querySelectorAll('.auth-card').forEach(el => el.classList.remove('active'));
+                document.getElementById(cardId).classList.add('active');
+            }
+            window.hideOverlay = function() {
+                document.getElementById('login-overlay').style.display = 'none';
+            }
+            window.showCard = function(cardId) {
+                document.querySelectorAll('.auth-card').forEach(el => el.classList.remove('active'));
+                document.getElementById(cardId).classList.add('active');
+            }
+
+            window.openRegistration = function(formId) {
+               const publicContainer = document.getElementById('public-reg-content');
+               const titleElement = document.getElementById('public-reg-title');
+               publicContainer.innerHTML = '';
+               let sourceViewId = '', title = '';
+               if(formId === 'agent-form') { sourceViewId = 'agent-registration-view'; title = 'Agent Registration'; }
+               if(formId === 'dealer-form') { sourceViewId = 'dealer-registration-view'; title = 'Dealer Registration'; }
+               if(formId === 'customer-form') { sourceViewId = 'customer-registration-view'; title = 'Customer Sign Up'; }
+               const sourceContent = document.querySelector(`#${sourceViewId} .reg-container`).cloneNode(true);
+               titleElement.textContent = title;
+               publicContainer.appendChild(sourceContent);
+               const newForm = publicContainer.querySelector('form');
+               if(newForm) {
+                   newForm.addEventListener('submit', (e) => {
+                       e.preventDefault();
+                       let email = "", password = "", name = "", role = "";
+                       if (formId === 'customer-form') {
+                           email = newForm.querySelector('#c-email').value; password = newForm.querySelector('#c-password').value; name = newForm.querySelector('#c-fname').value + ' ' + newForm.querySelector('#c-lname').value; role = 'customer';
+                       } else if (formId === 'agent-form') {
+                           email = newForm.querySelector('#agent-email').value; password = newForm.querySelector('#agent-password').value; name = newForm.querySelector('#fname').value + ' ' + newForm.querySelector('#lname').value; role = 'agent';
+                       } else if (formId === 'dealer-form') {
+                           email = newForm.querySelector('#dealer-email').value; password = newForm.querySelector('#dealer-password').value; name = newForm.querySelector('#d-fname').value + ' ' + newForm.querySelector('#d-lname').value; role = 'dealer';
+                       }
+                       if (email && password) {
+                           users[email] = { role: role, name: name, password: password, email: email };
+                           localStorage.setItem('db_users', JSON.stringify(users));
+                           if(!balances[email]) { balances[email] = 0.00; localStorage.setItem('db_balances', JSON.stringify(balances)); }
+                           alert(`Account created successfully! Please Login.`);
+                           showCard('login-card');
+                           document.getElementById('username').value = email;
+                       }
+                   });
+               }
+               showCard('public-reg-container');
+            }
+
+            document.getElementById('login-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                users = JSON.parse(localStorage.getItem('db_users'));
+                balances = JSON.parse(localStorage.getItem('db_balances'));
+                const u = document.getElementById('username').value.trim();
+                const p = document.getElementById('password').value.trim();
+                let userFound = users[u];
+                if(userFound && userFound.password === p) {
+                    currentUser = userFound;
+                    if(!currentUser.email) currentUser.email = u; 
+                    setupDashboardForRole(currentUser.role);
+                    hideOverlay();
+                    landingPage.style.display = 'none';
+                    dashboardApp.style.display = 'flex';
+                    document.getElementById('main-content').style.display = 'block';
+                    document.getElementById('sidebar').style.display = 'flex';
+                    updateWalletDisplays(); checkNotification();
+                    document.getElementById('user-name-display').textContent = currentUser.name;
+                    document.getElementById('user-role-display').textContent = currentUser.role.toUpperCase();
+                    document.querySelector('.user-avatar').textContent = currentUser.name.substring(0, 2).toUpperCase();
+                } else { document.getElementById('login-error').style.display = 'block'; }
+            });
+
+            window.handleLogout = function() {
+                if(confirm('Logout?')) { window.location.reload(); }
+            }
+
+            function setupDashboardForRole(role) {
+                const allLinks = document.querySelectorAll('.nav-item');
+                const walletUser = document.getElementById('user-wallet-section');
+                const walletAdmin = document.getElementById('admin-wallet-section');
+                const adminOrders = document.getElementById('admin-orders-view');
+                const userOrders = document.getElementById('user-orders-view');
+                const adminStats = document.getElementById('admin-stats');
+                const userStats = document.getElementById('user-stats');
+                const adminCourses = document.getElementById('admin-course-manage');
+                const userCourses = document.getElementById('user-course-catalog');
+                const adminMtnControls = document.getElementById('admin-mtn-edit-controls');
+                
+                allLinks.forEach(l => l.style.display = 'flex');
+                body.classList.remove('is-admin');
+                renderMtnPlans(role);
+
+                if(role === 'admin') {
+                    body.classList.add('is-admin');
+                    walletUser.style.display = 'none'; walletAdmin.style.display = 'block';
+                    adminOrders.style.display = 'block'; userOrders.style.display = 'none';
+                    adminStats.style.display = 'grid'; userStats.style.display = 'none';
+                    adminCourses.style.display = 'block'; userCourses.style.display = 'none';
+                    if(adminMtnControls) adminMtnControls.style.display = 'block'; 
+                    renderAdminOrders();
+                } else {
+                    walletUser.style.display = 'block'; walletAdmin.style.display = 'none';
+                    adminOrders.style.display = 'none'; userOrders.style.display = 'block';
+                    adminStats.style.display = 'none'; userStats.style.display = 'grid';
+                    adminCourses.style.display = 'none'; userCourses.style.display = 'grid';
+                    if(adminMtnControls) adminMtnControls.style.display = 'none';
+                    document.querySelector('[data-target="afa-registration"]').style.display = 'none';
+                    if(role === 'customer') {
+                        document.querySelector('[data-target="referral-settings"]').style.display = 'none';
+                        document.querySelector('[data-target="customers"]').style.display = 'none';
+                    }
+                }
+                renderCourses();
+            }
+            
+            function renderMtnPlans(role) {
+                const tbody = document.getElementById('mtn-plans-body');
+                tbody.innerHTML = '';
+                const headerTitle = document.querySelector('.plan-header.mtn h3');
+                if(role === 'dealer') headerTitle.textContent = 'MTN Ghana (Dealer Rates)';
+                else if(role === 'agent') headerTitle.textContent = 'MTN Ghana (Agent Rates)';
+                else if(role === 'customer') headerTitle.textContent = 'MTN Ghana (Retail Rates)';
+                else headerTitle.textContent = 'MTN Ghana (Base Rates)';
+
+                if(role === 'admin') {
+                    const thead = document.querySelector('.plan-card .plan-table thead tr');
+                    thead.innerHTML = `<th>Bundle</th><th>Agent Price</th><th>Dealer Price</th><th>Customer Price</th>`;
+                    mtnRates.forEach((rate, index) => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `<td>${rate.vol}</td>
+                            <td><input type="number" value="${rate.agent}" step="0.01" style="width:70px" onchange="updateMtnRate(${index}, 'agent', this.value)"></td>
+                            <td><input type="number" value="${rate.dealer}" step="0.01" style="width:70px" onchange="updateMtnRate(${index}, 'dealer', this.value)"></td>
+                            <td><input type="number" value="${rate.customer}" step="0.01" style="width:70px" onchange="updateMtnRate(${index}, 'customer', this.value)"></td>`;
+                        tbody.appendChild(tr);
+                    });
+                } else {
+                    const thead = document.querySelector('.plan-card .plan-table thead tr');
+                    thead.innerHTML = `<th>Bundle</th><th>Price</th><th>Validity</th><th>Action</th>`;
+                    mtnRates.forEach(rate => {
+                        let price = rate.customer; 
+                        if (role === 'agent') price = rate.agent;
+                        else if (role === 'dealer') price = rate.dealer;
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `<td>${rate.vol}</td><td class="price-tag">${price.toFixed(2)}</td><td>Non-Expiry</td><td><button class="btn-buy" onclick="initiateBundleBuy('MTN', '${rate.vol}', ${price})">Buy</button></td>`;
+                        tbody.appendChild(tr);
+                    });
+                }
+            }
+            
+            window.updateMtnRate = function(index, type, value) { mtnRates[index][type] = parseFloat(value); }
+            window.saveMtnPrices = function() { localStorage.setItem('db_mtn_rates', JSON.stringify(mtnRates)); alert("Prices updated successfully!"); }
+
+            window.adminManualCredit = function() {
+                const userKey = document.getElementById('manual-credit-user').value; 
+                const type = document.getElementById('wallet-action-type').value; 
+                const amt = parseFloat(document.getElementById('manual-credit-amount').value);
+                if(amt > 0) {
+                    balances = JSON.parse(localStorage.getItem('db_balances'));
+                    if (type === 'credit') {
+                        balances[userKey] = (balances[userKey] || 0) + amt;
+                        alert(`Successfully Credited GH₵ ${amt} to ${userKey}.`);
+                    } else {
+                        if(balances[userKey] >= amt) { balances[userKey] -= amt; alert(`Successfully Debited GH₵ ${amt} from ${userKey}.`); } else { alert(`Failed: Insufficient funds.`); return; }
+                    }
+                    localStorage.setItem('db_balances', JSON.stringify(balances));
+                    document.getElementById('manual-credit-amount').value = '';
+                } else { alert("Please enter a valid amount."); }
+            }
+
+            function updateWalletDisplays() {
+                balances = JSON.parse(localStorage.getItem('db_balances'));
+                const bal = balances[currentUser.email] || 0.00;
+                walletBalance = bal; 
+                document.querySelectorAll('.live-wallet-bal').forEach(el => { el.textContent = bal.toFixed(2); }); 
+            }
+
+            function renderAdminOrders() {
+                const tbody = document.getElementById('admin-orders-body'); tbody.innerHTML = '';
+                allOrders = JSON.parse(localStorage.getItem('db_orders'));
+                allOrders.forEach(ord => {
+                    let badge = ord.status === 'pending' ? 'status-pending' : (ord.status === 'processing' ? 'status-processing' : (ord.status === 'rejected' ? 'status-rejected' : 'status-completed'));
+                    let tr = document.createElement('tr');
+                    tr.className = `order-row ${badge}`;
+                    let actionButtons = '';
+                    if(ord.status === 'pending') {
+                        actionButtons = `<button class="action-btn btn-process" title="Pick Up" onclick="processAdminOrder(this, '${ord.id}', 'processing')"><i class="fas fa-play"></i></button><button class="action-btn btn-reject" title="Reject" onclick="rejectAdminOrder(this, '${ord.id}')"><i class="fas fa-times"></i></button>`;
+                    } else if(ord.status === 'processing') {
+                        actionButtons = `<button class="action-btn btn-approve" title="Complete" onclick="processAdminOrder(this, '${ord.id}', 'completed')"><i class="fas fa-check"></i></button><button class="action-btn btn-reject" title="Reject" onclick="rejectAdminOrder(this, '${ord.id}')"><i class="fas fa-times"></i></button>`;
+                    } else { actionButtons = `<span style="color:#ccc;">-</span>`; }
+                    tr.innerHTML = `<td>${ord.id}</td><td>${ord.user}</td><td>${ord.details}</td><td>${ord.phone}</td><td style="font-weight:bold;">GH₵ ${ord.amount.toFixed(2)}</td><td><span class="status-badge ${badge}">${ord.status}</span></td><td>${actionButtons}</td>`;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            window.processAdminOrder = function(btn, id, newStatus) {
+                let actionName = newStatus === 'processing' ? "pick up" : "complete";
+                if(confirm(`Are you sure you want to ${actionName} this order?`)) {
+                    const orderIndex = allOrders.findIndex(o => o.id === id);
+                    if(orderIndex > -1) { allOrders[orderIndex].status = newStatus; localStorage.setItem('db_orders', JSON.stringify(allOrders)); renderAdminOrders(); }
+                }
+            }
+            window.rejectAdminOrder = function(btn, id) {
+                if(confirm('Reject order?')) {
+                    const orderIndex = allOrders.findIndex(o => o.id === id);
+                    if(orderIndex > -1) { allOrders[orderIndex].status = 'rejected'; localStorage.setItem('db_orders', JSON.stringify(allOrders)); renderAdminOrders(); }
+                }
+            }
+            window.searchTransaction = function() {
+                const num = document.getElementById('support-search-input').value;
+                const resultDiv = document.getElementById('search-result-msg');
+                if(num.length >= 10) { resultDiv.innerHTML = `<span style="color:green;">✓ Transaction Found for ${num}</span>`; resultDiv.style.display = 'block'; document.getElementById('support-phone').value = num; document.getElementById('support-date').valueAsDate = new Date(); } else { resultDiv.innerHTML = `<span style="color:red;">✕ No recent transaction found.</span>`; resultDiv.style.display = 'block'; }
+            }
+            if(document.getElementById('support-form')) {
+                document.getElementById('support-form').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const tbody = document.getElementById('complaint-history-body');
+                    if(tbody.rows[0] && tbody.rows[0].cells.length === 1) tbody.innerHTML = '';
+                    const row = `<tr><td>${new Date().toLocaleDateString()}</td><td>${document.getElementById('support-phone').value}</td><td>${document.getElementById('support-type').value}</td><td><span class="status-badge status-pending">Pending</span></td></tr>`;
+                    tbody.insertAdjacentHTML('afterbegin', row);
+                    alert("Complaint submitted successfully!"); e.target.reset();
+                });
+            }
+            if(document.getElementById('forgot-form')) {
+                document.getElementById('forgot-form').addEventListener('submit', (e) => {
+                    e.preventDefault(); alert('If an account exists with this email, a password reset link has been sent.'); showCard('login-card');
+                });
+            }
+            navItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    const targetId = item.getAttribute('data-target');
+                    if(targetId) {
+                        e.preventDefault(); navItems.forEach(nav => nav.classList.remove('active')); item.classList.add('active');
+                        document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active-view'));
+                        const targetView = document.getElementById(targetId + '-view');
+                        if(targetView) targetView.classList.add('active-view');
+                        if (window.innerWidth <= 768) body.classList.add('mobile-hidden');
+                    }
+                });
+            });
+            toggleBtn.addEventListener('click', () => { if (window.innerWidth > 768) body.classList.toggle('collapsed-sidebar'); else body.classList.toggle('mobile-hidden'); });
+            overlay.addEventListener('click', () => body.classList.add('mobile-hidden'));
+            const topupForm = document.getElementById('topup-request-form');
+            if(topupForm) {
+                topupForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const amt = document.getElementById('topup-amount').value;
+                    alert(`Top-up request for GH₵ ${amt} submitted! Waiting for admin approval.`);
+                    document.getElementById('topup-form-container').style.display = 'none'; e.target.reset();
+                });
+            }
+        });
+    </script>
+</body>
+</html>
